@@ -1,0 +1,6 @@
+import cv2
+import numpy as np
+
+for i in xrange(20):
+	img = cv2.imread('suraj_cropped_'+str(i+1)+'.bmp')
+	cv2.imwrite('6_'+str(i+1)+'.bmp', img)
