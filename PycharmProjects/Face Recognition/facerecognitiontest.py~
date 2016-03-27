@@ -2,6 +2,30 @@ import cv2, os
 import math
 import numpy as np
 
+
+def contours_return(depth_array, num):
+    """
+    * Function Name:	contours_return
+    * Input:		Depth Frame and a number for shifting left or right the matrix.
+    * Output:		Returns the left or right edges contours
+    * Logic:		It does noise removal process on the frame and
+                    shifts the frame matrix by num places so that
+                    change in values are highlighted in the
+                    image by Binary Thresholding it.
+    * Example Call:	contours_return(a,5)
+    """
+    temp_b = np.roll(depth_array, num)
+    res = np.subtract(temp_b, depth_array)
+    result = cv2.medianBlur(res, 11)
+    mask = result > 200
+    result[mask] = 0
+    mask = result < 100
+    result[mask] = 0
+    ret, th3 = cv2.threshold(result, 50, 255, cv2.THRESH_BINARY)
+    cv2.imshow('Window',th3)
+    contours, hierarchy = cv2.findContours(th3, cv2.RETR_TREE,
+                                           cv2.CHAIN_APPROX_SIMPLE)
+    return contours
 '''def get_training_set(path):
     image_paths = [os.path.join(path, f) for f in os.listdir(path)]
 
@@ -14,6 +38,7 @@ import numpy as np
         label = int(image_path[19:21])
         images.append(image)
         labels.append(label)
+
     return images, labels
 
 def label_to_name(label, confidence):
@@ -61,7 +86,6 @@ while(1):
     gray = cv2.cvtColor(Frame,cv2.COLOR_BGR2GRAY)
     facesInInputImage = face_cascade.detectMultiScale(gray, 1.3,10)
     for (x, y, w, h) in facesInInputImage:
-        print w,h
         gray = gray[y:y+h, x:x+w]
         gray = cv2.resize(gray, (500, 500), interpolation = cv2.INTER_CUBIC)
         #labelDetected, confidence = face_recognizer.predict(gray)
@@ -71,7 +95,6 @@ while(1):
             nx = x + (w/2)
             ny = y + (h/2)
             if w > 100 and h > 50 and nx > 150 and nx < 350 and ny > 200 and ny < 350:
-                print 100
                 cv2.circle(gray,(nx,ny), 10, (0,0,255), -1)
         eyesInInputImage = Eyes.detectMultiScale(gray)
         for (x,y,w,h) in eyesInInputImage:
@@ -115,7 +138,7 @@ while(1):
         my = 0
 
         cv2.imshow('Video', gray)
-    if cv2.waitKey(1) == 1048603:
+    if cv2.waitKey(1) == 27:
 			break
     if count == 50:
         break

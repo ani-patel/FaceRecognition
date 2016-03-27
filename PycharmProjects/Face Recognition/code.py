@@ -57,10 +57,10 @@ while(1):
  for (x, y, w, h) in facesInInputImage:
 		input_image = input_image[y:y+h, x:x+w]
 		input_image = cv2.resize(input_image, (200, 200), interpolation = cv2.INTER_CUBIC)
-		#labelDetected, confidence = face_recognizer.predict(input_image)
-		#cv2.rectangle(input_image, (x, y), (x+w, y+h), (0,255,0), 3)
-		#print labelDetected
-		#label_to_name(labelDetected, confidence)
+		labelDetected, confidence = face_recognizer.predict(input_image)
+		cv2.rectangle(input_image, (x, y), (x+w, y+h), (0,255,0), 3)
+		print labelDetected
+		label_to_name(labelDetected, confidence)
 		cv2.imshow('Video', input_image)
 		count = count+1
 		if cv2.waitKey(1) == 1048603:

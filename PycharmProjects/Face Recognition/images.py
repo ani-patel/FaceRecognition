@@ -1,41 +1,6 @@
-import cv2, os
+import cv2
 import math
-import numpy as np
 
-'''def get_training_set(path):
-    image_paths = [os.path.join(path, f) for f in os.listdir(path)]
-
-    images = []
-    labels = []
-    for image_path in image_paths:
-
-        image1 = cv2.imread(image_path)
-        image = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-        label = int(image_path[19:21])
-        images.append(image)
-        labels.append(label)
-    return images, labels
-
-def label_to_name(label, confidence):
-    if label == 1:
-            print "Indranil is detected with confidence {}".format(confidence)
-    elif label == 2:
-            print "Aniket is detected with confidence {}".format(confidence)
-    elif label == 3:
-            print "Shubhankar is detected with confidence {}".format(confidence)
-    elif label == 4:
-            print "Suraj is detected with confidence {}".format(confidence)
-    elif label == 5:
-            print "Sagar is detected with confidence {}".format(confidence)
-    elif label == 6:
-            print "Hussain is detected with confidence {}".format(confidence)
-    return
-'''
-#face_recognizer = cv2.createLBPHFaceRecognizer()
-
-#images, labels = get_training_set('./finalsss')
-
-#face_recognizer.train(images, np.array(labels))
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 cap = cv2.VideoCapture(0)
 Nose = cv2.CascadeClassifier('Nose.xml')
@@ -56,22 +21,31 @@ tblen = 0
 tbrem = 0
 tblem = 0
 tbmn = 0
+X1 = 0
+Y1 = 0
+X2 = 0
+Y2 = 0
+X3 = 0
+Y3 = 0
+X4 = 0
+Y4 = 0
+MY = 0
 while(1):
     ret, Frame = cap.read()
     gray = cv2.cvtColor(Frame,cv2.COLOR_BGR2GRAY)
     facesInInputImage = face_cascade.detectMultiScale(gray, 1.3,10)
     for (x, y, w, h) in facesInInputImage:
-        print w,h
         gray = gray[y:y+h, x:x+w]
+        faceimg = Frame[y:y+h, x:x+w]
+        faceimg = cv2.resize(faceimg, (500,500), interpolation=cv2.INTER_CUBIC)
         gray = cv2.resize(gray, (500, 500), interpolation = cv2.INTER_CUBIC)
-        #labelDetected, confidence = face_recognizer.predict(gray)
-        #label_to_name(labelDetected, confidence)
+
         nosesInInputImage = Nose.detectMultiScale(gray, 1.5, minNeighbors = 3)
         for (x,y,w,h) in nosesInInputImage:
             nx = x + (w/2)
             ny = y + (h/2)
             if w > 100 and h > 50 and nx > 150 and nx < 350 and ny > 200 and ny < 350:
-                print 100
+                noseimg = faceimg[y:y+h, x:x+w]
                 cv2.circle(gray,(nx,ny), 10, (0,0,255), -1)
         eyesInInputImage = Eyes.detectMultiScale(gray)
         for (x,y,w,h) in eyesInInputImage:
@@ -79,16 +53,26 @@ while(1):
                 if x < 200:
                     lex = x + (w/2)
                     ley = y + (h/2)
+                    X1 = x
+                    Y1 = y
+                    X2 = x
+                    Y2 = y + h
                     cv2.circle(gray,(lex,ley),10,(255,0,0),-1)
                 if (x + w) > 300:
                     rex = x + (w/2)
                     rey = y + (h/2)
+                    X3 = x + w
+                    Y3 = y
+                    X4 = x + w
+                    Y4 = y + h
                     cv2.circle(gray,(rex,rey),10,(255,0,0),-1)
         mouthsInInputImage = Mouth.detectMultiScale(gray, 1.5, minNeighbors = 6)
         for (x,y,w,h) in mouthsInInputImage:
             mx = x + (w/2)
             my = y + (h/2)
             if y > 250 and w > 100:
+                mouthimg = faceimg[y:y+h,x:x+w]
+                MY = y + h
                 cv2.circle(gray,(mx,my),10,(255,0,0),-1)
 
     if lex != 0 and ley != 0 and rex != 0 and rey != 0 and nx != 0 and ny != 0 and mx != 0 and my != 0:
@@ -113,11 +97,23 @@ while(1):
         ny = 0
         mx = 0
         my = 0
-
+        if Y1 > Y3:
+            X = X1
+            Y = Y3
+            W = X3 - X1
+            H = Y2 - Y3
+        else:
+            X = X1
+            Y = Y1
+            W = X3 - X1
+            H = Y4 - Y1
+        eyesimg = faceimg[Y:Y+H,X:X+W]
+        exactfaceimg = faceimg[Y:MY,X:X+W]
+        cv2.imwrite('./faces/'+str(count)+'.jpg',exactfaceimg)
         cv2.imshow('Video', gray)
     if cv2.waitKey(1) == 1048603:
 			break
-    if count == 50:
+    if count == 10:
         break
     cv2.imshow('Camera',Frame)
 
